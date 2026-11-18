@@ -8,6 +8,19 @@ styling from the sibling apps (soft pills, circle icon buttons, tinted icon circ
 focus rings, grain): the rules below are about workflow, behaviour, wording and data only. Match
 this app's existing look for anything new.
 
+## Look
+
+- Light mode only: no dark theme, no theme setting, no `prefers-color-scheme: dark` rules.
+- No solid black buttons. Anything you can press is white (or yellow for the primary action)
+  with the ink border, and lifts on a black extrusion when hovered. The selected or current
+  state (active nav item, chosen segment or option, picked chip, current search) is `--sel`, a
+  light tint of the yellow, with ink text and an ink border, so the black extrusion still reads.
+- Yellow is a fill, never thin text, icon strokes or outlines on white: icons and text on light
+  backgrounds are ink (or `--ink2` grey). A ghost button gets its ink outline back when it lifts.
+- Sliding toggles (`SlideToggle`) don't lift on hover; the stage stepper doesn't either.
+- Page headings carry the page's icon in a yellow squircle (`PageHeader` with `icon`; `.h-icon`),
+  with no highlighter band behind the text.
+
 ## Workflow
 
 - Start with `git pull --ff-only`.
@@ -26,6 +39,25 @@ this app's existing look for anything new.
 
 ## Behaviour
 
+- Home (`/`) is the default page: counts for the chosen search, what's coming up, and recent
+  activity. The search menu at the top of the sidebar (top bar on phones) picks the search;
+  everything but the Story Bank follows it. The pick is remembered on the device
+  (`lib/currentSearch.ts`) and also saved as the server's `current_search_id`, which is what new
+  applications and assistants use.
+- Every detail of an application (title, company, pay, links, dates, company facts,
+  must-haves, notes, the job description) is edited in place on its page: each field, or small
+  group that edits together (pay), sits in an edit container with its pencil right-aligned. Tap
+  it to edit; single fields save on Enter or blur, groups and long text have Save and Cancel,
+  and Escape cancels. There's no edit sheet for an existing job (the sheet only adds a new one);
+  deleting sits at the bottom of the page. Tapping a stage on the stepper opens the status sheet
+  for that stage.
+- Files are just there or not (no locking). Adding one writes a "File added" note on the
+  timeline (`data.file_id`), dated when it was uploaded and editable like any note; deleting the
+  file removes it.
+- A story shows only its framework's parts, plus the extras that fit its kind
+  (`storyExtras` in `src/shared/frameworks.ts`): openers are just their parts; behavioral,
+  technical and custom stories also get a hook, competencies and probable questions. A field
+  that already holds something still shows; stored data is never dropped.
 - A sheet and its backdrop open and close together (nothing pops in or out partway), and
   `prefers-reduced-motion` turns motion off.
 - If drag to reorder is added: start it after a short press on touch so a swipe still scrolls,
@@ -64,4 +96,25 @@ this app's existing look for anything new.
   one back if the owner asks (e.g. `update_story` with `archived: false`), and say so in the
   server's instructions. Archived stories have `list_archived_stories`.
 - `find_applications` looks in the current search unless `all_searches` is true, and says how many
-  more matches sit in past searches.
+  more matches sit in past searches. The current search is the one last picked in the app.
+- People with role `other` carry their own words in `other_role`, shown in place of "Other".
+
+## Statuses and stories
+
+- Statuses show an icon, not a colour (`STATUS_ICON` in `components/StatusChip.tsx`); every
+  status chip is the same plain chip.
+- The stage bar (`components/StageBar.tsx`) is Saved → Applied → Screening → Interviewing → Offer →
+  Closed. Closed covers Accepted, Rejected, Declined and Ghosted; picking it asks how it ended.
+- Call Mode's notepad ("Call notes") saves itself (about a second after typing stops, and on
+  blur or leaving) into one note on the job's timeline, on the meeting if there is one; the
+  note is found again by its `external_ref` (`call-notes:<meeting id>`, or the application and
+  day without a meeting), so reopening Call Mode loads it back. Text is never cleared, and
+  unsaved text is kept on the device until it saves. **End call** opens "How did it go?": the
+  reflections save as their own "How it went" note (dated now, on the meeting); Skip or close
+  saves nothing more.
+- No "told" concept: stories aren't marked as told or heard by anyone (no UI, API or MCP tool).
+  The `story_tells` table stays in D1 and in exports, unused, rather than dropping it with a
+  migration.
+- A job keeps its own copy of a Story Bank story. Talk about it in plain words ("You changed this
+  for PwC", "Your Story Bank story has changed since"), with at most the one or two actions that
+  fit. No version numbers, "push", "pull" or "bank" jargon in the UI.

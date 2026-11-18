@@ -38,8 +38,8 @@ export function AboutSheet() {
         <Wordmark pop />
       </div>
       <p style={{ marginTop: 0 }}>
-        Knock Knock is a free, open-source job search tracker: every application as a timeline, a
-        Story Bank for interviews, and an MCP server so your AI assistant keeps it all up to date.
+        Knock Knock is a free, open-source job search tracker: every application as a timeline, a a
+        story bank for interviews, and an MCP server so your AI assistant keeps it all up to date.
         It runs on your own Cloudflare account, so your search stays yours.
       </p>
       <Joke />

@@ -1,5 +1,5 @@
 // The counts every filter shows. A filter over the same data shows the same choices and the same
-// numbers wherever it appears (the Pipeline board, its list and the Stage toggle; the Story Bank's
+// numbers wherever it appears (the Pipeline board, its list and the Stage toggle; Stories'
 // Framework and Competency toggles), so they all count here.
 import { CLOSED_STATUSES, OPEN_STATUSES, statusLabel, type Status } from '@shared/lookups';
 import type { Application, Framework, Story } from '@shared/types';
@@ -47,7 +47,7 @@ export function stageCounts(apps: Application[]): StageCounts {
 export const stageLabel = (stage: Stage, counts: StageCounts) =>
   `${stage === 'open' ? 'Open' : stage === 'closed' ? 'Closed' : statusLabel(stage)} ${counts.count(stage)}`;
 
-/** Story Bank filters: frameworks and competencies in use, counted within current or archived. */
+/** Stories filters: frameworks and competencies in use, counted within current or archived. */
 export function storyCounts(stories: Story[], frameworks: Framework[], archived: boolean) {
   const pool = stories.filter((s) => s.archived === archived);
   const byFw = new Map<string, number>();

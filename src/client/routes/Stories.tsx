@@ -34,7 +34,8 @@ export function Stories() {
   return (
     <>
       <PageHeader
-        title="Story Bank"
+        title="Stories"
+        icon="quote"
         action={
           <button type="button" className="btn primary" onClick={() => sheets.newStory()}>
             <Icon name="plus" size={18} /> New story
@@ -42,8 +43,8 @@ export function Stories() {
         }
       />
       <p className="sub page-sub">
-        Templates. Linking one to a job makes a copy you can tailor; the bank only changes when you
-        push.
+        Linking a story to a job gives that job its own copy to tailor. Changing it there doesn’t
+        change it here unless you choose to.
       </p>
       <div className="toolbar">
         <label className="search-in">
@@ -81,9 +82,6 @@ export function Stories() {
       <div className="story-grid">
         {hits.map(({ item: s, question }) => {
           const copies = data.state.job_stories.filter((j) => j.story_id === s.id);
-          const told = data.state.tells.filter((t) =>
-            copies.some((c) => c.id === t.job_story_id),
-          ).length;
           return (
             <button
               key={s.id}
@@ -107,8 +105,7 @@ export function Stories() {
                 </span>
               )}
               <span className="mono sub">
-                v{s.version} · in {copies.length} {copies.length === 1 ? 'job' : 'jobs'} · told{' '}
-                {told}×
+                v{s.version} · in {copies.length} {copies.length === 1 ? 'job' : 'jobs'}
               </span>
             </button>
           );
@@ -120,7 +117,7 @@ export function Stories() {
           <p className="sub">
             Start with an Introduction (tell me about yourself) and a Why this job, then the five or
             six STAR stories you tell most. Or ask your assistant: “Write a STAR story about the
-            time I… and add it to my Story Bank.”
+            time I… and add it to my Stories.”
           </p>
           <button type="button" className="btn primary" onClick={() => sheets.newStory()}>
             New story

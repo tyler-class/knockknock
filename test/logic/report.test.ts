@@ -89,7 +89,6 @@ describe('notifications', () => {
       frameworks: [],
       stories: [],
       job_stories: [],
-      tells: [],
       files: [],
     } as unknown as AppState;
     const n = dueNotices(state, now, 'America/New_York');

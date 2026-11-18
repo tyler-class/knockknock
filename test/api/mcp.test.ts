@@ -171,12 +171,13 @@ describe('MCP', () => {
         'list_archived_stories',
         'create_story',
         'link_story',
-        'record_story_told',
         'upload_link',
         'add_text_file',
         'get_file_text',
       ]),
     );
+    // Stories aren't marked as told any more.
+    expect(names).not.toContain('record_story_told');
     const prompts = await rpc(token, 'prompts/list');
     expect(
       (prompts.data.result as unknown as { prompts: { name: string }[] }).prompts.map(
@@ -288,7 +289,7 @@ describe('MCP', () => {
       external_ref: 'gcal:777',
     });
 
-    // Stories: write one, find it by the question, link it, tell it.
+    // Stories: write one, find it by the question, link it.
     const st = await tool<{ created: { id: string } }>(token, 'create_story', {
       framework: 'STAR',
       title: 'Pushing back on a VP deadline',
@@ -315,13 +316,6 @@ describe('MCP', () => {
       angle: 'Lead with the date.',
     });
     expect(linked.error).toBeNull();
-    const told = await tool(token, 'record_story_told', {
-      application: 'Copperleaf',
-      story: 'Pushing back',
-      meeting: manual.data.logged.id,
-      heard_by: ['Dana Ruiz'],
-    });
-    expect(told.error).toBeNull();
 
     // Archiving takes a story out of list_stories; list_archived_stories finds it and says how
     // to bring it back, and update_story with archived: false restores it.

@@ -461,7 +461,11 @@ export function PageHeader({
   return (
     <header className="page-h">
       <h1>
-        {icon && <Icon name={icon} size={26} />}
+        {icon && (
+          <span className="h-icon" aria-hidden="true">
+            <Icon name={icon} size={24} />
+          </span>
+        )}
         {title}
       </h1>
       {action}
