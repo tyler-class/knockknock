@@ -13,7 +13,7 @@ import { whenLabel } from '../lib/format';
 import { useSheets } from '../sheets/context';
 import { Asterisk } from '../components/Brand';
 import { Icon } from '../components/Icon';
-import { SlideToggle, cx } from '../components/ui';
+import { AutoTextarea, SlideToggle, cx } from '../components/ui';
 
 type Item = (JobStory | Story) & { kind: 'job' | 'bank'; defs: FrameworkSection[] };
 
@@ -240,7 +240,7 @@ export function CallMode() {
           )}
           <section className="card">
             <span className="lbl">Scratch note</span>
-            <textarea
+            <AutoTextarea
               className="in"
               rows={5}
               value={scratch}
@@ -323,7 +323,7 @@ export function CallMode() {
             </>
           ) : (
             <p className="empty">
-              No stories yet. Add some in the <Link to="/stories">story bank</Link>.
+              No stories yet. Add some in the <Link to="/stories">Story Bank</Link>.
             </p>
           )}
         </article>

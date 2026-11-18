@@ -1,10 +1,19 @@
-import { useState } from 'react';
 import { Link } from 'react-router';
-import { CLOSED_STATUSES, OPEN_STATUSES, statusLabel, type Status } from '@shared/lookups';
+import { OPEN_STATUSES, statusLabel } from '@shared/lookups';
 import { isUpcoming, quietDays } from '@shared/logic/timeline';
 import type { Application, MeetingData } from '@shared/types';
 import { useData } from '../lib/queries';
 import { compLabel, relDays } from '../lib/format';
+import {
+  CLOSED_STAGES,
+  STAGES,
+  isStage,
+  stageCounts,
+  stageLabel,
+  stageStatuses,
+  type Stage,
+} from '../lib/filters';
+import { useViewState } from '../lib/viewState';
 import { useSheets } from '../sheets/context';
 import { CompanyMark, StatusChip } from '../components/StatusChip';
 import { Icon } from '../components/Icon';
@@ -76,17 +85,21 @@ function Card({
 export function Pipeline() {
   const data = useData();
   const sheets = useSheets();
-  const [view, setView] = useState<View>(() =>
-    window.matchMedia('(min-width: 900px)').matches ? 'board' : 'list',
-  );
-  const [stage, setStage] = useState<Status | 'open' | 'closed'>('open');
-  const [q, setQ] = useState('');
+  // Remembered on this device and kept in the address (?view=list&stage=applied&q=acme).
+  const [choice, choose] = useViewState('kk:pipeline', {
+    view: window.matchMedia('(min-width: 900px)').matches ? 'board' : 'list',
+    stage: 'open',
+    q: '',
+  });
+  const view: View = choice.view === 'list' ? 'list' : 'board';
+  const stage: Stage = isStage(choice.stage) ? choice.stage : 'open';
+  const q = choice.q;
   if (!data) return null;
   const now = new Date();
   const ql = q.trim().toLowerCase();
   const apps = data.apps.filter((a) => !ql || `${a.company} ${a.title}`.toLowerCase().includes(ql));
-  const by = (s: Status) => apps.filter((a) => a.status === s);
-  const closed = apps.filter((a) => CLOSED_STATUSES.includes(a.status) || a.status === 'accepted');
+  const counts = stageCounts(apps);
+  const by = counts.byStatus;
 
   return (
     <>
@@ -103,7 +116,7 @@ export function Pipeline() {
           <Icon name="search" size={16} />
           <input
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => choose({ q: e.target.value })}
             placeholder="Company or title"
             aria-label="Search applications"
           />
@@ -111,7 +124,7 @@ export function Pipeline() {
         <SlideToggle
           label="View"
           value={view}
-          onChange={setView}
+          onChange={(v) => choose({ view: v })}
           options={[
             ['board', 'Board'],
             ['list', 'List'],
@@ -136,18 +149,15 @@ export function Pipeline() {
             <section className="col closed-col" aria-label="Closed">
               <div className="col-h">
                 <span className="lbl">Closed</span>
-                <span className="mono sub">{closed.length}</span>
+                <span className="mono sub">{counts.count('closed')}</span>
               </div>
               <div className="closed-box">
-                {(['accepted', ...CLOSED_STATUSES] as Status[]).map((s) => (
+                {CLOSED_STAGES.map((s) => (
                   <button
                     key={s}
                     type="button"
                     className="closed-line"
-                    onClick={() => {
-                      setView('list');
-                      setStage(s);
-                    }}
+                    onClick={() => choose({ view: 'list', stage: s })}
                   >
                     <StatusChip status={s} small />
                     <span className="mono">{by(s).length}</span>
@@ -163,20 +173,15 @@ export function Pipeline() {
           <SlideToggle
             label="Stage"
             value={stage}
-            onChange={setStage}
+            onChange={(v) => choose({ stage: v })}
             options={[
-              ['open', `Open ${apps.filter((a) => OPEN_STATUSES.includes(a.status)).length}`],
-              ...OPEN_STATUSES.map((s) => [s, `${statusLabel(s)} ${by(s).length}`] as const),
-              ['closed', `Closed ${closed.length}`],
+              ...STAGES.map((s) => [s, stageLabel(s, counts)] as const),
+              // A closed status picked from the board's Closed box stays a choice here.
+              ...(STAGES.includes(stage) ? [] : [[stage, stageLabel(stage, counts)] as const]),
             ]}
           />
           <div className="plist">
-            {(stage === 'open'
-              ? OPEN_STATUSES.slice().reverse()
-              : stage === 'closed'
-                ? (['accepted', ...CLOSED_STATUSES] as Status[])
-                : [stage]
-            ).map((s) => {
+            {stageStatuses(stage).map((s) => {
               const rows = by(s);
               if (!rows.length) return null;
               return (
@@ -202,7 +207,13 @@ export function Pipeline() {
                 </section>
               );
             })}
-            {!apps.length && <p className="empty">No applications in this search yet.</p>}
+            {!apps.length ? (
+              <p className="empty">
+                {ql ? 'Nothing matches.' : 'No applications in this search yet.'}
+              </p>
+            ) : (
+              !counts.count(stage) && <p className="empty">Nothing here right now.</p>
+            )}
           </div>
         </>
       )}

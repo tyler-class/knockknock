@@ -40,6 +40,7 @@ import type {
   Story,
   TimelineEvent,
 } from '@shared/types';
+import pkg from '../../package.json';
 import { app } from './app';
 import { AGENT, INTERNAL } from './auth';
 
@@ -251,12 +252,13 @@ const INSTRUCTIONS =
     'Log emails as summaries of what happened, not the whole email. For negotiation, put the numbers in key_points.',
     'Times without an offset are the owner’s local time.',
     'Stories: list_stories searches the bank by the question being asked. link_story copies a bank story to an application; edits to the copy stay with that job.',
+    'Archived stories are left out of list_stories, search_overview and get_started. To find one, use list_archived_stories; if the owner asks to bring one back, call update_story with archived: false.',
     'To attach a file the person has (resume, transcript), call upload_link and give them the link; a file seen in the chat cannot be passed to a tool. For a transcript you already have as text, use add_text_file.',
   ].join(' ') + GETTING_STARTED;
 
 function buildServer(call: Call) {
   const server = new McpServer(
-    { name: 'knockknock', version: '1.0.0' },
+    { name: 'knockknock', version: pkg.version },
     { instructions: INSTRUCTIONS },
   );
 
@@ -277,9 +279,9 @@ function buildServer(call: Call) {
       (a) => isOpen(a.status),
     );
 
-  const findStory = (c: Ctx, key: string) =>
+  const findStory = (c: Ctx, key: string, includeArchived = false) =>
     pick(
-      c.state.stories.filter((s) => !s.archived),
+      c.state.stories.filter((s) => includeArchived || !s.archived),
       key,
       (s) => [s.title],
       'bank story',
@@ -434,12 +436,15 @@ function buildServer(call: Call) {
         all_searches: z
           .boolean()
           .optional()
-          .describe('Include applications from past searches (default: all searches).'),
+          .describe(
+            'Also look in past searches (default false: only the current search). Turn it on when nothing in the current search fits.',
+          ),
       }),
       annotations: { readOnlyHint: true },
     },
-    safe(async ({ query, url, status }) => {
+    safe(async ({ query, url, status, all_searches }) => {
       const c = await load();
+      const cur = c.state.settings.current_search_id;
       const p = new URLSearchParams();
       if (query) p.set('q', query);
       if (url) p.set('url', url);
@@ -448,9 +453,18 @@ function buildServer(call: Call) {
         'GET',
         `/applications?${p}`,
       );
+      const inScope =
+        all_searches || !cur ? applications : applications.filter((a) => a.search_id === cur);
+      const elsewhere = applications.length - inScope.length;
       return {
-        count: applications.length,
-        applications: applications.slice(0, 50).map((a) => ({
+        count: inScope.length,
+        ...(elsewhere
+          ? {
+              in_past_searches: elsewhere,
+              note: `${elsewhere} more in past searches; pass all_searches: true to see them.`,
+            }
+          : {}),
+        applications: inScope.slice(0, 50).map((a) => ({
           ...appLine(a, c),
           people: c.state.people
             .filter((x) => x.application_id === a.id)
@@ -1022,6 +1036,34 @@ function buildServer(call: Call) {
   );
 
   server.registerTool(
+    'list_archived_stories',
+    {
+      title: 'Find archived stories',
+      description:
+        'Archived bank stories, which list_stories and the overview leave out. Use it when the owner asks about a story you can’t find, or about what they archived. Each result is archived; to bring one back, only if the owner asks, call update_story with archived: false.',
+      inputSchema: z.object({
+        query: z.string().optional().describe('Words or an interview question to match.'),
+        tag: z.string().optional(),
+      }),
+      annotations: { readOnlyHint: true },
+    },
+    safe(async ({ query, tag }) => {
+      const c = await load();
+      const pool = c.state.stories.filter((s) => s.archived);
+      const hits = searchStories(pool, query ?? '', tag);
+      return {
+        note: 'These stories are archived: they are not in list_stories or the overview. To restore one when the owner asks, call update_story with its id and archived: false.',
+        count: hits.length,
+        stories: hits.slice(0, 25).map((h) => ({
+          ...storyOut(h.item, c, false),
+          archived: true,
+          ...(h.question ? { matched_question: h.question } : {}),
+        })),
+      };
+    }),
+  );
+
+  server.registerTool(
     'get_story',
     {
       title: 'Get a story',
@@ -1100,11 +1142,15 @@ function buildServer(call: Call) {
     {
       title: 'Update a bank story',
       description:
-        'Changes a bank story (its version goes up). Job copies don’t change until someone pulls.',
+        'Changes a bank story (its version goes up). Job copies don’t change until someone pulls. Also finds archived stories: pass archived: false to bring one back (only when the owner asks), or archived: true to archive one.',
       inputSchema: z.object({
-        story: z.string(),
+        story: z.string().describe('Title or id.'),
         framework: z.string().optional(),
         ...Object.fromEntries(Object.entries(storyFields).map(([k, v]) => [k, v.optional()])),
+        archived: z
+          .boolean()
+          .optional()
+          .describe('true archives it (out of the normal results); false brings it back.'),
       }),
     },
     safe(
@@ -1114,7 +1160,7 @@ function buildServer(call: Call) {
         ...input
       }: { story: string; framework?: string } & Record<string, unknown>) => {
         const c = await load();
-        const s = findStory(c, story);
+        const s = findStory(c, story, true);
         const body: Record<string, unknown> = Object.fromEntries(
           Object.entries(input).filter(([, v]) => v !== undefined),
         );

@@ -14,7 +14,15 @@ import { nearby } from '@shared/logic/timeline';
 import type { Attendee, EmailData, MeetingData, TimelineEvent } from '@shared/types';
 import { useActions, type Data } from '../lib/queries';
 import { fromLocalInput, toLocalInput, whenLabel } from '../lib/format';
-import { ConfirmButton, Field, Select, Sheet, SlideToggle, TagInput } from '../components/ui';
+import {
+  AutoTextarea,
+  ConfirmButton,
+  Field,
+  Select,
+  Sheet,
+  SlideToggle,
+  TagInput,
+} from '../components/ui';
 import { Icon, type IconName } from '../components/Icon';
 import { useSheets, type LogType } from './context';
 
@@ -311,7 +319,7 @@ export function EventSheet({
             </div>
           </Field>
           <Field label="Topics and format">
-            <textarea
+            <AutoTextarea
               className="in"
               rows={3}
               value={agenda}
@@ -320,7 +328,7 @@ export function EventSheet({
             />
           </Field>
           <Field label="Details">
-            <textarea
+            <AutoTextarea
               className="in"
               rows={2}
               value={body}
@@ -384,7 +392,7 @@ export function EventSheet({
             <input className="in" value={title} onChange={(e) => setTitle(e.target.value)} />
           </Field>
           <Field label="What happened (a summary, not the whole email)">
-            <textarea
+            <AutoTextarea
               className="in"
               rows={3}
               value={body}
@@ -414,7 +422,7 @@ export function EventSheet({
       {type === 'note' && (
         <>
           <Field label="Note">
-            <textarea
+            <AutoTextarea
               className="in"
               rows={6}
               autoFocus

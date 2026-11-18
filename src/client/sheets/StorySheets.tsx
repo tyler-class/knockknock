@@ -11,7 +11,8 @@ import {
 } from '@shared/logic/stories';
 import type { Framework, JobStory, Story } from '@shared/types';
 import { useActions, type Data } from '../lib/queries';
-import { ConfirmButton, Field, Select, Sheet, TagInput, cx } from '../components/ui';
+import { useToast } from '../components/Toast';
+import { AutoTextarea, ConfirmButton, Field, Select, Sheet, TagInput, cx } from '../components/ui';
 import { Icon } from '../components/Icon';
 import { useSheets } from './context';
 
@@ -91,7 +92,7 @@ function StoryForm({
       </Field>
       {defs.map((sec) => (
         <Field key={sec.key} label={sec.label}>
-          <textarea
+          <AutoTextarea
             className="in"
             rows={3}
             value={v.sections[sec.key] ?? ''}
@@ -108,7 +109,7 @@ function StoryForm({
           placeholder="conflict, architecture, finance…"
         />
       </Field>
-      <Field label="Probable questions (call mode matches what you type against these)">
+      <Field label="Probable questions (Call Mode matches what you type against these)">
         <TagInput
           value={v.questions}
           onChange={(questions) => set({ questions })}
@@ -131,7 +132,7 @@ function StoryForm({
         )}
       </Field>
       <Field label="Notes">
-        <textarea
+        <AutoTextarea
           className="in"
           rows={2}
           value={v.notes}
@@ -153,6 +154,7 @@ export function StorySheet({
 }) {
   const sheets = useSheets();
   const act = useActions();
+  const toast = useToast();
   const s = id ? data.state.stories.find((x) => x.id === id) : undefined;
   const [v, setV] = useState<Content>(() => contentOf(s, framework));
   const set = (p: Partial<Content>) => setV((x) => ({ ...x, ...p }));
@@ -193,9 +195,18 @@ export function StorySheet({
             <button
               type="button"
               className="btn"
-              onClick={async () =>
-                (await act.patch(`/stories/${s.id}`, { archived: !s.archived })) && sheets.close()
-              }
+              onClick={async () => {
+                const was = s.archived;
+                if (!(await act.patch(`/stories/${s.id}`, { archived: !was }))) return;
+                sheets.close();
+                toast({
+                  text: was ? 'Unarchived' : 'Archived',
+                  action: {
+                    label: 'Undo',
+                    run: () => void act.patch(`/stories/${s.id}`, { archived: was }),
+                  },
+                });
+              }}
             >
               {s.archived ? 'Unarchive' : 'Archive'}
             </button>
@@ -235,7 +246,7 @@ export function FrameworkPicker({ data, onPick }: { data: Data; onPick: (key: st
   return (
     <Sheet
       title="Pick a framework"
-      sub="Every framework is just named sections. Same bank, same copies, same call mode."
+      sub="Every framework is just named sections. Same bank, same copies, same Call Mode."
       onClose={sheets.close}
     >
       <div className="fw-grid">
@@ -325,7 +336,7 @@ export function JobStorySheet({
       }
     >
       <Field label="Angle: how to frame it for this job (never counts as an edit)">
-        <textarea
+        <AutoTextarea
           className="in angle"
           rows={2}
           value={angle}

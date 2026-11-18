@@ -232,7 +232,7 @@ function StoriesTab({ a, data }: { a: Application; data: Data }) {
           Write a job-only story
         </button>
         <Link className="btn" to={`/a/${a.id}/call`}>
-          Open call mode
+          Open Call Mode
         </Link>
       </div>
       <p className="sub">

@@ -147,7 +147,7 @@ export function Today() {
                   </span>
                   <div className="acts">
                     <Link className="btn sm primary" to={`/a/${a.id}/call?meeting=${e.id}`}>
-                      Call mode
+                      Call Mode
                     </Link>
                     {d.join_url && (
                       <a className="btn sm" href={d.join_url} target="_blank" rel="noreferrer">

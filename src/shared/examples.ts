@@ -35,7 +35,7 @@ export const EXAMPLE_PROMPTS: ExamplePrompt[] = [
     why: 'A short list with drafts if you want them.',
   },
   {
-    prompt: 'Write a STAR story about <project> and add it to my story bank.',
+    prompt: 'Write a STAR story about <project> and add it to my Story Bank.',
     why: 'Talk it through; it lands in the bank with probable questions.',
   },
   {

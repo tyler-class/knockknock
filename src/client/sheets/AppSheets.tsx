@@ -14,10 +14,13 @@ import {
   type Status,
   type WorkMode,
 } from '@shared/lookups';
-import type { Application, Person, Search } from '@shared/types';
+import type { Application, Person, Search, TimelineEvent } from '@shared/types';
+import { api } from '../lib/api';
 import { useActions, type Data } from '../lib/queries';
+import { useToast } from '../components/Toast';
 import { fromLocalInput, toLocalInput } from '../lib/format';
 import {
+  AutoTextarea,
   ChoiceInput,
   ConfirmButton,
   Field,
@@ -284,10 +287,15 @@ export function ApplicationSheet({ data, id }: { data: Data; id?: string }) {
         />
       </Field>
       <Field label="Notes">
-        <textarea className="in" rows={3} value={f.notes} onChange={set('notes')} />
+        <AutoTextarea className="in" rows={3} value={f.notes} onChange={set('notes')} />
       </Field>
     </Sheet>
   );
+}
+
+interface Written {
+  event: TimelineEvent | null;
+  application: Application;
 }
 
 const STATUS_CHOICES: Status[] = [...OPEN_STATUSES, 'accepted', ...CLOSED_STATUSES];
@@ -296,6 +304,7 @@ export function StatusSheet({ data, appId, to }: { data: Data; appId: string; to
   const a = data.appById.get(appId);
   const sheets = useSheets();
   const act = useActions();
+  const toast = useToast();
   const [next, setNext] = useState<Status | null>(to ?? null);
   const [when, setWhen] = useState(toLocalInput(new Date().toISOString()));
   const [reason, setReason] = useState('');
@@ -309,19 +318,50 @@ export function StatusSheet({ data, appId, to }: { data: Data; appId: string; to
   async function save() {
     if (!next || !a) return;
     setBusy(true);
-    const ok = await act.post(`/applications/${a.id}/status`, {
+    // What undo puts back: status lives in the timeline, so undo deletes the status events this
+    // wrote (the status is recomputed from what's left), plus the applied date and the search's
+    // state if this change set them.
+    const appliedBefore = a.applied_on;
+    const search = data.state.searches.find((s) => s.id === a.search_id);
+    const searchBefore = search && { status: search.status, ended_on: search.ended_on };
+    const written: { appId: string; eventId: string; applied_on: string | null }[] = [];
+    const ok = await act.post<Written>(`/applications/${a.id}/status`, {
       status: next,
       occurred_at: fromLocalInput(when) ?? undefined,
       reason: reason || null,
     });
+    if (ok?.event) written.push({ appId: a.id, eventId: ok.event.id, applied_on: appliedBefore });
     if (ok && next === 'accepted')
-      for (const id of decline)
-        await act.post(`/applications/${id}/status`, {
+      for (const id of decline) {
+        const before = data.appById.get(id)?.applied_on ?? null;
+        const r = await act.post<Written>(`/applications/${id}/status`, {
           status: 'declined',
           reason: `Accepted ${a.company}`,
         });
+        if (r?.event) written.push({ appId: id, eventId: r.event.id, applied_on: before });
+      }
     setBusy(false);
-    if (ok) sheets.close();
+    if (!ok) return;
+    sheets.close();
+    if (!written.length) return;
+    const moved = next;
+    toast({
+      text: `Moved to ${statusLabel(moved)}`,
+      action: {
+        label: 'Undo',
+        run: () =>
+          void act.run(async () => {
+            for (const w of written) {
+              await api.del(`/events/${w.eventId}`);
+              const now = await api.get<Application>(`/applications/${w.appId}`);
+              if (w.applied_on !== now.applied_on)
+                await api.patch(`/applications/${w.appId}`, { applied_on: w.applied_on });
+            }
+            if (moved === 'accepted' && search && searchBefore)
+              await api.patch(`/searches/${search.id}`, searchBefore);
+          }, 'Status put back'),
+      },
+    });
   }
 
   return (
@@ -368,7 +408,7 @@ export function StatusSheet({ data, appId, to }: { data: Data; appId: string; to
         </Field>
       </div>
       <Field label="Why (optional)">
-        <textarea
+        <AutoTextarea
           className="in"
           rows={2}
           value={reason}
@@ -475,7 +515,7 @@ export function PersonSheet({ data, appId, id }: { data: Data; appId: string; id
         />
       </Field>
       <Field label="Notes">
-        <textarea
+        <AutoTextarea
           className="in"
           rows={3}
           value={notes}
@@ -568,7 +608,7 @@ export function SearchSheet({ data, id }: { data: Data; id?: string }) {
         </Field>
       )}
       <Field label="Notes">
-        <textarea
+        <AutoTextarea
           className="in"
           rows={3}
           value={notes}
