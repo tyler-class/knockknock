@@ -4073,12 +4073,6 @@ textarea.in.angle {
   font-size: 13px;
   font-weight: 600;
 }
-.live {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #ff4d4d;
-}
 .call-bar .btn {
   --ext: #ffe14d;
 }
@@ -6436,6 +6430,7 @@ time,
   white-space: nowrap;
 }
 .wchart {
+  container-type: inline-size;
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr);
   grid-template-rows: 200px auto;
@@ -6511,10 +6506,26 @@ time,
   color: var(--ink3);
   white-space: nowrap;
 }
-@media (max-width: 600px) {
-  .wchart-x span:nth-child(even):not(:last-child) {
+/* Twelve week labels need room: in a narrow chart, label every other week (or every third),
+   counting back from this week so it always keeps its label. */
+@container (max-width: 560px) {
+  .wchart-x span:nth-last-child(even) {
     visibility: hidden;
   }
+}
+@container (max-width: 340px) {
+  .wchart-x span:nth-last-child(even) {
+    visibility: visible;
+  }
+  .wchart-x span:not(:nth-last-child(3n + 1)),
+  .wchart-x span:nth-last-child(4) {
+    visibility: hidden;
+  }
+}
+/* "This week" is wider than its column: it hangs left from the chart's right edge. */
+.wchart-x span:last-child {
+  display: flex;
+  justify-content: flex-end;
 }
 
 /* Status badges: solid, white icon, so they stand clear of any grey or white behind them. */

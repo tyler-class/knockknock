@@ -39,7 +39,7 @@ One deployment is one person's job search (or many, one after another: searches 
 
 ![Stories: each story with its framework, how many jobs use it, and custom frameworks](docs/screenshots/stories.png)
 
-![The report: applied, heard back, interviews and offers, and a Sankey of where applications went](docs/screenshots/report.png)
+![The report: applied, heard back, interviews and offers, a Sankey of where applications went, response rate by where you found the job, time to hear back, and applications per week](docs/screenshots/report.png)
 
 <img src="docs/screenshots/phone-timeline.png" width="320" alt="A job's timeline on a phone, with the upcoming panel interview on top">
 
