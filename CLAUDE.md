@@ -78,8 +78,9 @@ Don't bring in styling from the sibling apps; match this app's look for anything
   deleting sits at the bottom of the page. Tapping a stage on the stepper opens the status sheet
   for that stage.
 - The Job card holds everything about the role: its fields, Required and Preferred, and the
-  pasted job posting at the end (clamped, with Show full posting). Notes sits under it in the
-  left column; Company and People on the right.
+  pasted job posting at the end (clamped, with Show full posting). It fills the left
+  column; the right column stacks Company, People and Notes. The two columns stack on their own,
+  so a short card never leaves a gap beside a long one.
 - The timeline is one plain list with no filter. Every entry's icon sits in a grey disc in a white
   circle, all in the same grey and line weight; status changes use the bar-built arrow
   (`StatusArrow`), the job being added the asterisk, files the paperclip. The rail starts at the
