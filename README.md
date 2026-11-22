@@ -6,46 +6,81 @@ The app only stores and shows. Your assistant does the reading and the judging o
 
 [![Deploy to Cloudflare](docs/deploy-to-cloudflare.svg)](https://deploy.workers.cloudflare.com/?url=https://github.com/tyler-class/knockknock)
 
-![A job's timeline: the stage bar, an upcoming panel interview with Open Call Mode and Join, then a status change, emails and a held meeting with its call notes underneath](docs/screenshots/timeline.png)
+One deployment is one person's job search (or many, one after another: searches keep each stretch separate). It runs on your own Cloudflare account, and the free plan is plenty.
 
-- **Home.** Counts for the search you're in (applications, open, applied this week, interviews this week), what's coming up in the next two weeks, and recent activity across every job.
-- **Every job is a page.** A header with the title, company, work mode, applied date and pay, and a stage bar: Saved → Applied → Screening → Interviewing → Offer → Closed (Accepted, Rejected, Declined or Ghosted). Tabs for Details, Timeline, Stories and Files. Every detail (title, pay, links, requirements, notes, the pasted posting) edits in place where it's shown: tap it, type, and it saves when you press Enter or click away.
-- **Every job has a timeline.** Status changes, meetings (kind, time, join link, attendees, topics), emails (a summary of what happened, with key points for negotiations), notes and files, newest first, with upcoming meetings on top and notes nested under the meeting or email they're about. Tap any entry to open it and edit it in place.
-- **Status is history, not a field.** Every change is an event on the timeline, and the status is whatever the timeline says. Backfilling "they rejected me on the 3rd" lands in the right place, closed jobs remember the stage they closed from, and the report counts everything correctly. Changing a status can be undone from the toast.
-- **Jobs.** A board with a lane per stage on a computer, a list with stage tabs on a phone. Drag cards into your own order within a lane, or onto another lane to change the status. Each card shows the company logo, pay, work mode and source, how long since anything happened, and a highlighted pill only when there's something to act on: an interview coming up, an offer to decide on, a job gone quiet.
-- **Companies and people.** A company is its own record with its website, LinkedIn, headquarters, size, industry and funding, and can have several jobs. Its logo shows on its page, on the jobs there and in lists; a company without one gets a monogram, the first letter of its name (skipping a leading "The" or "A") on an ultramarine tile, in any of ten colors you pick from its page. Your assistant can find a company's logo on the web and attach it, and match the monogram to the brand's color. People (recruiters, hiring managers, interviewers, referrers) work at a company and can be on any of its jobs.
-- **Stories.** STAR, CAR, SOAR, Introduction, Why this job, Why I'm looking, Failure, Weakness, Design decision, or a framework of your own. A story is its framework's parts. Search by the question you were asked and the stories whose words match come up first.
-- **A copy for each job.** Linking a story to a job copies it, so you can tailor it and add how to angle it for this company without touching the original. The copy says in plain words when you've changed it for this job or the original in Stories has changed since, and offers the one or two actions that fit.
-- **Call Mode.** A full-screen view to keep beside the video call: who's in the room, the topics, call notes that save themselves to the meeting as you type, and a search box. Type the question you just heard and the job's stories, then the rest of Stories, come up with each part in big type and the angle for this job. **End call** asks how it went and saves your reflections as their own note.
-- **Report.** Where every application went (a Sankey built from status history), how many heard back and how many reached interviews and offers, response rate by where you found the job and by which resume you sent, median time to hear back, and how many you applied to each week.
-- **Files.** Resumes, cover letters, transcripts and offer letters in your own private R2 bucket, with a SHA-256 of exactly what you sent. Adding one puts it on the timeline. Transcripts and other text files stay readable for your assistant.
-- **Searches.** One deployment keeps each stretch of job hunting as its own search. Pick the search from the menu at the top of the sidebar; everything but Stories follows it.
-- **Built for phones.** Install it to your home screen. Notifications for interviews today, jobs that have gone quiet, and debriefs to write.
-- **Yours.** It runs on your own Cloudflare account. The free plan is plenty.
+## What it does
 
-![Call Mode: who's in the room, the topics, call notes, and a story found by the question just asked, shown part by part with the angle for this job](docs/screenshots/call-mode.png)
+### Home
 
-One deployment is one person's job search (or many, one after another: searches keep each stretch separate).
-
-## Screenshots
+Counts for the search you're in (applications, open, applied this week, interviews this week), what's coming up in the next two weeks, and recent activity across every job. Tap an activity to jump to it on that job's timeline.
 
 ![Home: counts for the search, interviews coming up, and recent activity](docs/screenshots/home.png)
 
-![A job's Details tab: The Job card with every field editable in place, the Company card with the company's logo, and the people on the job](docs/screenshots/job.png)
+### Jobs
+
+A board with a lane per stage on a computer, a list with stage tabs on a phone. Drag cards into your own order within a lane, or onto another lane to change the status. Each card shows the company's logo, pay, work mode and source, how long since anything happened, and a highlighted pill only when there's something to act on: an interview coming up, an offer to decide on, a job gone quiet.
 
 ![The Jobs board: Applied, Screening, Interviewing and Offer lanes, each card with its company's logo or monogram, pay, work mode, source and what needs doing](docs/screenshots/jobs.png)
 
+### A page for every job
+
+A header with the title, company, work mode, location, applied date and pay, and a stage bar: Saved → Applied → Screening → Interviewing → Offer → Closed (Accepted, Rejected, Declined or Ghosted). Tap a stage to move the job there. Tabs for Details, Timeline, Stories and Files. Every detail (title, pay, links, requirements, notes, the pasted posting) edits in place where it's shown: tap it, type, and it saves when you press Enter or click away.
+
+![A job's Details tab: The Job card with every field editable in place, the Company card with the company's logo, and the people on the job](docs/screenshots/job.png)
+
+### The timeline
+
+Every job has one: status changes, meetings (kind, time, join link, attendees, topics), emails (a summary of what happened, with key points for negotiations), notes and files. Upcoming meetings sit on top, then everything else, newest first, with notes nested under the meeting or email they're about. Tap any entry to open it and edit it in place.
+
+**Status is history, not a field.** Every change is an event on the timeline, and the status is whatever the timeline says. Backfilling "they rejected me on the 3rd" lands in the right place, closed jobs remember the stage they closed from, and the report counts everything correctly. Changing a status can be undone from the toast.
+
+![A job's timeline: the stage bar, an upcoming panel interview with Open Call Mode and Join, then a status change, emails and a held meeting with its call notes underneath](docs/screenshots/timeline.png)
+
+### Companies and people
+
+A company is its own record with its website, LinkedIn, headquarters, size, industry and funding, and can have several jobs. People (recruiters, hiring managers, interviewers, referrers) work at a company and can be on any of its jobs.
+
 ![Companies: each company with its logo, or its monogram in the color picked for it](docs/screenshots/companies.png)
+
+A company's page holds its details, the jobs you have there across every search, and its people. Its logo shows here, on the jobs there and in every list.
 
 ![A company's page: its logo, details, the jobs there and the people who work there](docs/screenshots/company.png)
 
+A company without a logo gets a monogram: the first letter of its name (skipping a leading "The" or "A") on an ultramarine tile. Pick another of ten colors from the ⋯ menu on its page, or upload a logo there. Your assistant can also find a company's logo on the web and attach it, and match the monogram to the brand's color.
+
 ![A company without a logo: its monogram, and the logo menu with Upload logo and ten colors to choose from](docs/screenshots/company-monogram.png)
+
+### Stories
+
+STAR, CAR, SOAR, Introduction, Why this job, Why I'm looking, Failure, Weakness, Design decision, or a framework of your own. A story is its framework's parts. Search by the question you were asked and the stories whose words match come up first.
+
+**A copy for each job.** Linking a story to a job copies it, so you can tailor it and add how to angle it for this company without touching the original. The copy says in plain words when you've changed it for this job or the original in Stories has changed since, and offers the one or two actions that fit.
 
 ![Stories: each story with its framework, how many jobs use it, and custom frameworks](docs/screenshots/stories.png)
 
+### Call Mode
+
+A full-screen view to keep beside the video call: who's in the room, the topics, call notes that save themselves to the meeting as you type, and a search box. Type the question you just heard and the job's stories, then the rest of Stories, come up with each part in big type and the angle for this job. **End call** asks how it went and saves your reflections as their own note.
+
+![Call Mode: who's in the room, the topics, call notes, and a story found by the question just asked, shown part by part with the angle for this job](docs/screenshots/call-mode.png)
+
+### Report
+
+Where every application went (a Sankey built from status history), how many heard back and how many reached interviews and offers, response rate by where you found the job and by which resume you sent, median time to hear back, and how many you applied to each week.
+
 ![The report: applied, heard back, interviews and offers, a Sankey of where applications went, response rate by where you found the job, time to hear back, and applications per week](docs/screenshots/report.png)
 
+### Built for phones
+
+Install it to your home screen and it works like an app, with notifications for interviews today, jobs that have gone quiet, and debriefs to write.
+
 <img src="docs/screenshots/phone-timeline.png" width="320" alt="A job's timeline on a phone, with the upcoming panel interview on top">
+
+### And
+
+- **Files.** Resumes, cover letters, transcripts and offer letters in your own private R2 bucket, with a SHA-256 of exactly what you sent. Adding one puts it on the timeline. Transcripts and other text files stay readable for your assistant.
+- **Searches.** Each stretch of job hunting is its own search. Pick it from the menu at the top of the sidebar; everything but Stories and Companies follows it.
+- **Yours.** It runs on your own Cloudflare account, and your data stays in your own database and storage.
 
 <!-- kit:readme:start -->
 <!-- Written by the Selfhost Kit (kit/docs/readme-install.md): edit it there. -->
