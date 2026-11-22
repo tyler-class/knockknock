@@ -128,4 +128,16 @@ describe('people at companies', () => {
     state = (await api.get<AppState>('/state')).data;
     expect(state.people.find((p) => p.id === sam.id)?.company_id).toBe(one.company_id);
   });
+
+  it('keeps a monogram color from the palette, and null puts it back to ultramarine', async () => {
+    const api = await session();
+    const co = (await api.post<Company>('/companies', { name: 'The Copperleaf Group' })).data;
+    expect(co.logo_color).toBeNull();
+    const teal = await api.patch<Company>(`/companies/${co.id}`, { logo_color: 'teal' });
+    expect(teal.data.logo_color).toBe('teal');
+    const bad = await api.patch(`/companies/${co.id}`, { logo_color: '#ff00ff' });
+    expect(bad.status).toBe(400);
+    const back = await api.patch<Company>(`/companies/${co.id}`, { logo_color: null });
+    expect(back.data.logo_color).toBeNull();
+  });
 });

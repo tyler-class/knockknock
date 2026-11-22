@@ -133,7 +133,7 @@ Don't bring in styling from the sibling apps; match this app's look for anything
   the job still see them. A company name or detail written to a job (the job page, an assistant)
   goes to its company: a name links the job to the company of that name (ignoring case) or makes
   one, except that a job alone at its company renames it. Website replaces Domain in the UI (the
-  domain is derived from it). A logo is optional and shows on Jobs cards and rows.
+  domain is derived from it). A logo is optional and shows wherever the company does (`CompanyLogo`): Jobs cards and rows, the Companies list, a job's Company card and the company's page. Without one, the company shows a monogram: the first letter of its name's first word that isn't an article ("The Copperleaf Group" → C; `monogram` in `src/shared/logo.ts`), white on ultramarine, or on one of the ten `LOGO_COLORS` picked from the logo menu (⋯) on the company's page (`logo_color`).
   Companies have their own list (`/companies`, in the sidebar) and page (`/c/:id`), where their
   details and logo are edited. A job's Company card is a lookup: pick or type the company, see a
   summary (facts, website, LinkedIn, other jobs there), and Open company to change it.
