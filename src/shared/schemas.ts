@@ -334,6 +334,8 @@ export const companyPatch = z
     logo_color: z.enum(LOGO_COLOR_KEYS).nullable(),
   })
   .partial();
+/** A company logo from an image on the web (or a data: URL holding one). */
+export const logoFromUrl = z.object({ url: z.string().trim().min(1).max(3_000_000) });
 /** Point a job at a company: an existing one by id, or a new one by name. */
 export const companyLink = z.union([
   z.object({ company_id: z.string().max(100) }),

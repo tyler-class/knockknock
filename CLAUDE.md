@@ -177,6 +177,11 @@ Don't bring in styling from the sibling apps; match this app's look for anything
 - `find_applications` looks in the current search unless `all_searches` is true, and says how many
   more matches sit in past searches. The current search is the one last picked in the app.
 - People with role `other` carry their own words in `other_role`, shown in place of "Other".
+- `set_company_logo` attaches a logo from an image's address on the web (or a data: URL). The
+  worker fetches it (`POST /companies/:id/logo-from-url`) and keeps it only if its bytes are a
+  PNG, JPEG, WebP, GIF or SVG, up to 2 MB. The same tool sets the monogram's color: the tool and
+  server instructions tell assistants they may pick the color closest to the company's brand,
+  otherwise leave the default. `get_application` shows the company's mark (`company_mark`).
 
 ## Statuses and stories
 
