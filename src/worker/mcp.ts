@@ -281,7 +281,7 @@ const INSTRUCTIONS =
     'Bank vs job-only, for stories and questions alike: link_story / link_question put a bank item on a job, linked. While it is unchanged there it follows the bank: editing the bank item updates it on the job too. Editing its content on the job (update_job_story, update_job_question) makes it a job-only variant: the job keeps the new words, the link is dropped, and the bank item never changes (a story’s angle or the order doesn’t count as an edit). create_job_story and add_job_question write one just for a job; save_job_story_to_bank / save_job_question_to_bank add a job-only one to the bank and link it. remove_job_story / remove_job_question take a linked one off the job (the bank keeps it) but delete a job-only one.',
     'Archived stories and questions are left out of list_stories, list_questions, round_overview and get_started. To find one, use list_archived_stories or list_archived_questions; if the owner asks to bring one back, call update_story or update_question with archived: false.',
     'To attach a file the person has (resume, transcript), call upload_link and give them the link; a file seen in the chat cannot be passed to a tool. For a transcript you already have as text, use add_text_file. Adding a file puts a "File added" note on the timeline (with file_id); change its time with update_event if the file belongs to an earlier moment.',
-    'People work at a company and can be on several of its jobs. add_person on an application first reuses someone already at its company with the same name or email; on a company alone it adds someone on no job yet. link_person puts someone known on another job, remove_person_from_job takes them off one job only (they stay at the company). find_people searches everyone. People have a role (recruiter, hiring_manager, interviewer, referrer or other); for other, put their actual role in other_role.',
+    'People work at a company and can be on several of its jobs. add_person on an application first reuses someone already at its company with the same name or email; on a company alone it adds someone on no job yet. link_person puts someone known on another job, remove_person_from_job takes them off one job only (they stay at the company). set_person_company moves someone to another company or takes them off theirs; their jobs stay. find_people searches everyone. People have a role (recruiter, hiring_manager, interviewer, referrer or other); for other, put their actual role in other_role.',
     'Companies are their own records: get_company shows one with its jobs and people, update_company changes its details (every job there follows). A company name written to an application (update_application) links the job to the company of that name, or makes one.',
     'Hard deletes (delete_application, delete_company, delete_person, delete_story, delete_question, delete_file, and removing a job-only story or question) can’t be undone: say what will go and get the owner’s yes first.',
     'Companies show their logo, or without one a monogram (their initial) on an ultramarine tile. set_company_logo attaches a logo from an image on the web (find the company’s own logo and pass the image’s address) and sets the monogram’s color: if you know the brand color you may pick the closest of the ten, otherwise leave the default.',
@@ -1179,6 +1179,48 @@ function buildServer(call: Call) {
         ...(p.company_id && a.company_id && p.company_id !== a.company_id
           ? { note: `${p.name} works at ${companyName(c, p.company_id)}, not ${a.company}.` }
           : {}),
+      };
+    }),
+  );
+
+  server.registerTool(
+    'set_person_company',
+    {
+      title: 'Move someone to a company, or off one',
+      description:
+        'Sets the company someone works at: give `company` (a name or id; a name that matches no company, ignoring case, adds it) to link them to it or move them there, or `remove: true` to take them off their company. Their jobs stay as they are (someone can be on a job at another company, like an agency recruiter). Use add_person for someone new.',
+      inputSchema: z.object({
+        person: z.string().describe('Their name, email or id.'),
+        company: z.string().optional().describe('The company’s name or id.'),
+        remove: z.boolean().optional().describe('True to take them off their company.'),
+      }),
+    },
+    safe(async ({ person, company, remove }) => {
+      const c = await load();
+      const p = findPerson(c, person);
+      if (remove) {
+        if (!p.company_id)
+          return { unchanged: personOut(p, c), note: `${p.name} isn’t at a company.` };
+        const was = companyName(c, p.company_id);
+        const next = await call<Person>('PATCH', `/people/${p.id}`, { company_id: null });
+        return { removed_from: was, person: personOut(next, c) };
+      }
+      if (!company?.trim()) throw new Error('Give a company, or remove: true.');
+      const key = company.trim().toLowerCase();
+      const match = c.state.companies.find(
+        (co) => co.id === company.trim() || co.name.toLowerCase() === key,
+      );
+      if (match && match.id === p.company_id)
+        return { unchanged: personOut(p, c), note: `${p.name} is already at ${match.name}.` };
+      const next = await call<Person>(
+        'PATCH',
+        `/people/${p.id}`,
+        match ? { company_id: match.id } : { company_name: company.trim() },
+      );
+      // A company added just now isn't in the state read above.
+      return {
+        moved: personOut(next, match ? c : await load()),
+        ...(match ? {} : { note: `Added ${company.trim()} as a new company.` }),
       };
     }),
   );

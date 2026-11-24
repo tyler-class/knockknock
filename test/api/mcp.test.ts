@@ -812,6 +812,30 @@ describe('MCP', () => {
     });
     expect(made.data.created.name).toBe('Juniper Freight');
 
+    // Moving someone between companies, off one, and to one that's new.
+    const moved = await tool<{ moved: { company: string } }>(token, 'set_person_company', {
+      person: 'Priya',
+      company: 'juniper freight',
+    });
+    expect(moved.data.moved.company).toBe('Juniper Freight');
+    const offCo = await tool<{ removed_from: string }>(token, 'set_person_company', {
+      person: 'Priya',
+      remove: true,
+    });
+    expect(offCo.data.removed_from).toBe('Juniper Freight');
+    const back = await tool<{ moved: { company: string } }>(token, 'set_person_company', {
+      person: 'Priya',
+      company: 'Tidewell',
+    });
+    expect(back.data.moved.company).toBe('Tidewell');
+    const fresh = await tool<{ moved: { company: string }; note: string }>(
+      token,
+      'set_person_company',
+      { person: 'Sam Okafor', company: 'Brightline Talent' },
+    );
+    expect(fresh.data.moved.company).toBe('Brightline Talent');
+    expect(fresh.data.note).toMatch(/new company/);
+
     // Deleting a person, a job and a company.
     expect((await tool(token, 'delete_person', { person: 'Sam Okafor' })).error).toBeNull();
     const delJob = await tool<{ deleted: string }>(token, 'delete_application', {
