@@ -54,7 +54,7 @@ A company without a logo gets a monogram: the first letter of its name (skipping
 
 ![A company without a logo: its monogram, and the logo menu with Upload logo and ten colors to choose from](docs/screenshots/company-monogram.png)
 
-**People** and **Files** list everyone and every file across your companies and jobs, beside Jobs and Companies under one row of tabs. Tap someone to edit them, take them off a job, or delete them. A file can be on several jobs: upload it from Files, then link it to each job it went with.
+**People** and **Files** list everyone and every file across your companies and jobs, beside Jobs and Companies under one row of tabs. Tap someone to edit them, move them to another company (or add one), take them off a job, or delete them. A file can be on several jobs: upload it from Files, then link it to each job it went with.
 
 ![People: everyone at your companies, with their role, title, the jobs they're on and their company](docs/screenshots/people.png)
 

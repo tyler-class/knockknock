@@ -151,8 +151,8 @@ Don't bring in styling from the sibling apps; match this app's look for anything
   person makes one there. A company's page lists its people and can add someone on no job yet.
   Remove from job takes them off that job only; deleting a job leaves its people at the company
   (only someone at no company goes with it). `PATCH /people/:id` also takes `company_id` (null takes them off
-  their company) or `company_name` (found or added): assistants use `set_person_company`; the app
-  doesn't offer it yet.
+  their company) or `company_name` (found or added): a person's sheet has a Company lookup
+  (`CompanyLookup`: Change, search, Add company, No company) and assistants use `set_person_company`.
 - The Jobs board opens on a computer and the list on a phone (not remembered; a switch is kept
   in the address as `?view=` while you're there). Cards can be
   dragged within a lane into your own order (`board_position`, saved straight away and put back if
