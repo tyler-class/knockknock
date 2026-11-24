@@ -243,7 +243,7 @@ Once a day your copy tells Knock Knock's developer that it exists: a random id i
 
 Knock Knock includes an [MCP](https://modelcontextprotocol.io) server at `https://<your-knock-knock>/mcp`. Open **Settings → Connect an AI assistant** to copy your URL and see steps for Claude, ChatGPT, Claude Code and others. When an assistant connects, Knock Knock shows a sign-in page; enter your password to approve it. **Settings → Connect an AI assistant** also lists what's connected and can sign them all out.
 
-![An AI assistant connected to Knock Knock: on a laptop it logs the day's emails, moves Lumen Health to Screening and adds a technical interview, then preps a Tessellate panel with the people in the room and two matching STAR stories; on a phone it says what's on today and which applications have gone quiet](docs/screenshots/ai-chat.png)
+![An AI assistant connected to Knock Knock: on a laptop it logs the day's emails, moves Lumen Health to Screening and adds a technical interview, then preps a Tessellate panel with the people in the room, two stories to bring and a question from the job's list for each interviewer; on a phone it says what's on today and which applications have gone quiet](docs/screenshots/ai-chat.png)
 
 ### How the agent flows work
 
