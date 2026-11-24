@@ -115,8 +115,7 @@ Don't bring in styling from the sibling apps; match this app's look for anything
   the parts, so Stories, Call Mode, linking and `list_stories` search the title, the framework's
   name and the parts' text (`searchStories` in `src/shared/logic/stories.ts`). The `hook`,
   `tags` and `questions` columns (and frameworks' `questions`) stay in D1 and in exports, unused,
-  rather than dropping them with a migration; they also stay in the copy hash so existing job
-  copies keep their sync state. The UI and MCP tools don't show or take them (the API's story
+  rather than dropping them with a migration; they also stay in the copy hash. The UI and MCP tools don't show or take them (the API's story
   schemas still accept `hook`, `tags` and `questions`).
 - A new story's sheet is titled "New Story" whatever the framework; Cancel goes back to the
   framework picker.
@@ -241,6 +240,12 @@ Don't bring in styling from the sibling apps; match this app's look for anything
 - No "told" concept: stories aren't marked as told or heard by anyone (no UI, API or MCP tool).
   The `story_tells` table stays in D1 and in exports, unused, rather than dropping it with a
   migration.
-- A job keeps its own copy of a Story Bank story. Talk about it in plain words ("You changed this
-  for PwC", "Your Story Bank story has changed since"), with at most the one or two actions that
-  fit. No version numbers, "push", "pull" or "bank" jargon in the UI.
+- A job's story or question from the bank is linked to it and follows it: while it's unchanged on
+  the job, saving the bank one updates the job's copy too (its angle and place stay). Editing its
+  content on the job (a story's title, framework, parts or notes; a question's words, but not a
+  story's angle or the order) makes it a job-only variant: the job keeps the edited words, the
+  link to the bank is dropped (`story_id` / `question_id` set to null) and the bank one never
+  changes. No messages about it and no push/pull: the job's row shows the item plainly, and
+  "Save to bank" sits only on job-only items (it adds a new bank item and links to it). Remove
+  unlinks a linked one and deletes a job-only one. The copy hash and the `source_version` and
+  `base_hash` columns stay.
